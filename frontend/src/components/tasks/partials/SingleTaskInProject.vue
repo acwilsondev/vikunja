@@ -200,6 +200,15 @@
 						@update:modelValue="setLabels"
 					/>
 				</div>
+				<hr class="dropdown-divider">
+				<DropdownItem
+					v-cy="'quickActions.delete'"
+					icon="trash-alt"
+					class="has-text-danger"
+					@click="showDeleteModal = true"
+				>
+					{{ $t('task.detail.actions.delete') }}
+				</DropdownItem>
 			</Dropdown>
 
 			<slot />
@@ -218,6 +227,19 @@
 				</template>
 			</template>
 		</template>
+		<Modal
+			:enabled="showDeleteModal"
+			@close="showDeleteModal = false"
+			@submit="deleteTask()"
+		>
+			<template #header>
+				<span>{{ $t('task.detail.delete.header') }}</span>
+			</template>
+			<template #text>
+				<p>{{ $t('task.detail.delete.text1') }}</p>
+				<p>{{ $t('task.detail.delete.text2') }}</p>
+			</template>
+		</Modal>
 	</div>
 </template>
 
@@ -242,6 +264,8 @@ import FancyCheckbox from '@/components/input/FancyCheckbox.vue'
 import ColorBubble from '@/components/misc/ColorBubble.vue'
 import Popup from '@/components/misc/Popup.vue'
 import Dropdown from '@/components/misc/Dropdown.vue'
+import DropdownItem from '@/components/misc/DropdownItem.vue'
+import Modal from '@/components/misc/Modal.vue'
 import PrioritySelect from '@/components/tasks/partials/PrioritySelect.vue'
 import EditLabels from '@/components/tasks/partials/EditLabels.vue'
 
@@ -277,6 +301,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
 	'taskUpdated': [task: ITask],
+	'taskDeleted': [task: ITask],
 }>()
 
 function getTaskById(taskId: number): ITask | undefined {
@@ -422,6 +447,14 @@ async function setPriority(priority: number) {
 function setLabels(labels: ILabel[]) {
 	task.value.labels = labels
 	emit('taskUpdated', task.value)
+}
+
+const showDeleteModal = ref(false)
+
+async function deleteTask() {
+	await taskStore.delete(task.value)
+	success({message: t('task.detail.deleteSuccess')})
+	emit('taskDeleted', task.value)
 }
 
 const taskRoot = ref<HTMLElement | null>(null)

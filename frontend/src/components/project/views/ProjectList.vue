@@ -77,6 +77,7 @@
 								:the-task="t"
 								:all-tasks="allTasks"
 								@taskUpdated="updateTasks"
+								@taskDeleted="handleTaskDeleted"
 							>
 								<span
 									v-if="canDragTasks && isPositionSorting"
@@ -232,6 +233,10 @@ function updateTasks(updatedTask: ITask) {
 			break
 		}
 	}
+}
+
+function handleTaskDeleted() {
+	loadTasks(false)
 }
 
 function handleDragStart(e: { item: HTMLElement }) {
