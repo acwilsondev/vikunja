@@ -1031,7 +1031,8 @@
         "color": "Set Color",
         "delete": "Delete",
         "favorite": "Add to Favorites",
-        "unfavorite": "Remove from Favorites"
+        "unfavorite": "Remove from Favorites",
+        "quickActions": "Quick actions for '{task}'"
       }
     },
     "attributes": {
