@@ -7,6 +7,7 @@ import {ProjectFactory} from '../../factories/project'
 import {createProjects} from './prepareProjects'
 import {BucketFactory} from '../../factories/bucket'
 import {createTasksWithPriorities, createTasksWithSearch} from '../../support/filterTestHelpers'
+import {LabelFactory} from '../../factories/labels'
 
 test.describe('Project View List', () => {
 	test('Should be an empty project', async ({authenticatedPage: page}) => {
@@ -253,5 +254,64 @@ test.describe('Project View List', () => {
 
 		// Only one task should be visible (the searchable one)
 		await expect(page.locator('.tasks .task')).toHaveCount(1)
+	})
+
+	test('Should change a task\'s priority from the quick actions menu', async ({authenticatedPage: page}) => {
+		await createProjects(1)
+		const tasks = await TaskFactory.create(1, {
+			id: 1,
+			project_id: 1,
+			priority: 0,
+		})
+		await page.goto('/projects/1/1')
+
+		const row = page.locator('.tasks .task').filter({hasText: tasks[0].title}).first()
+		await row.locator('.quick-actions .dropdown-trigger').click()
+		await row.locator('.quick-actions__field select').selectOption('4')
+
+		await expect(row.locator('.priority-label')).toContainText('Urgent')
+
+		await page.reload()
+		await expect(
+			page.locator('.tasks .task').filter({hasText: tasks[0].title}).first().locator('.priority-label'),
+		).toContainText('Urgent')
+	})
+
+	test('Should add a label from the quick actions menu', async ({authenticatedPage: page}) => {
+		await createProjects(1)
+		const tasks = await TaskFactory.create(1, {
+			id: 1,
+			project_id: 1,
+		})
+		await LabelFactory.create(1, {id: 1, title: 'quick-actions-label'})
+		await page.goto('/projects/1/1')
+
+		const row = page.locator('.tasks .task').filter({hasText: tasks[0].title}).first()
+		await row.locator('.quick-actions .dropdown-trigger').click()
+		await row.locator('.quick-actions__field .multiselect input').fill('quick-actions-label')
+		await page.locator('.multiselect .search-result-button').filter({hasText: 'quick-actions-label'}).first().click()
+
+		await expect(row.locator('.labels .tag')).toContainText('quick-actions-label')
+
+		await page.reload()
+		await expect(
+			page.locator('.tasks .task').filter({hasText: tasks[0].title}).first().locator('.labels .tag'),
+		).toContainText('quick-actions-label')
+	})
+
+	test('Should delete a task from the quick actions menu', async ({authenticatedPage: page}) => {
+		await createProjects(1)
+		const tasks = await TaskFactory.create(1, {
+			id: 1,
+			project_id: 1,
+		})
+		await page.goto('/projects/1/1')
+
+		const row = page.locator('.tasks .task').filter({hasText: tasks[0].title}).first()
+		await row.locator('.quick-actions .dropdown-trigger').click()
+		await row.locator('[data-cy="quickActions.delete"]').click()
+		await page.locator('[data-cy="modalPrimary"]').click()
+
+		await expect(page.locator('.tasks .task').filter({hasText: tasks[0].title})).toHaveCount(0)
 	})
 })
