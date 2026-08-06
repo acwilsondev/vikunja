@@ -178,6 +178,30 @@
 					:icon="['far', 'star']"
 				/>
 			</BaseButton>
+
+			<Dropdown
+				class="quick-actions"
+				trigger-icon="ellipsis-h"
+				:trigger-label="$t('task.detail.actions.quickActions', {task: task.title})"
+				@click.stop
+			>
+				<div class="quick-actions__field">
+					<label class="quick-actions__label">{{ $t('task.detail.actions.priority') }}</label>
+					<PrioritySelect
+						v-model="task.priority"
+						@update:modelValue="setPriority"
+					/>
+				</div>
+				<div class="quick-actions__field">
+					<label class="quick-actions__label">{{ $t('task.detail.actions.label') }}</label>
+					<EditLabels
+						:model-value="task.labels"
+						:task-id="task.id"
+						@update:modelValue="setLabels"
+					/>
+				</div>
+			</Dropdown>
+
 			<slot />
 		</div>
 		<template v-if="typeof task.relatedTasks?.subtask !== 'undefined'">
@@ -203,6 +227,7 @@ import {useI18n} from 'vue-i18n'
 
 import TaskModel, {getHexColor} from '@/models/task'
 import type {ITask} from '@/modelTypes/ITask'
+import type {ILabel} from '@/modelTypes/ILabel'
 
 import PriorityLabel from '@/components/tasks/partials/PriorityLabel.vue'
 import Labels from '@/components/tasks/partials/Labels.vue'
@@ -216,6 +241,9 @@ import BaseButton from '@/components/base/BaseButton.vue'
 import FancyCheckbox from '@/components/input/FancyCheckbox.vue'
 import ColorBubble from '@/components/misc/ColorBubble.vue'
 import Popup from '@/components/misc/Popup.vue'
+import Dropdown from '@/components/misc/Dropdown.vue'
+import PrioritySelect from '@/components/tasks/partials/PrioritySelect.vue'
+import EditLabels from '@/components/tasks/partials/EditLabels.vue'
 
 import TaskService from '@/services/task'
 
@@ -382,6 +410,20 @@ async function toggleFavorite() {
 	emit('taskUpdated', task.value)
 }
 
+async function setPriority(priority: number) {
+	const newTask = await taskStore.update({
+		...task.value,
+		priority,
+	})
+	task.value = newTask
+	emit('taskUpdated', newTask)
+}
+
+function setLabels(labels: ILabel[]) {
+	task.value.labels = labels
+	emit('taskUpdated', task.value)
+}
+
 const taskRoot = ref<HTMLElement | null>(null)
 const taskLinkRef = ref<HTMLElement | null>(null)
 
@@ -521,6 +563,17 @@ defineExpose({
 			opacity: 1;
 			color: var(--warning);
 		}
+	}
+
+	.quick-actions__field {
+		padding: $item-padding;
+	}
+
+	.quick-actions__label {
+		display: block;
+		font-size: .75rem;
+		color: var(--grey-400);
+		margin-block-end: .25rem;
 	}
 
 	@media(hover: hover) and (pointer: fine) {
