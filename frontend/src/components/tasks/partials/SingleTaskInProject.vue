@@ -180,6 +180,7 @@
 			</BaseButton>
 
 			<Dropdown
+				v-if="showQuickActions"
 				class="quick-actions"
 				trigger-icon="ellipsis-h"
 				:trigger-label="$t('task.detail.actions.quickActions', {task: task.title})"
@@ -291,12 +292,14 @@ const props = withDefaults(defineProps<{
 	disabled?: boolean,
 	canMarkAsDone?: boolean,
 	allTasks?: ITask[],
+	showQuickActions?: boolean,
 }>(), {
 	isArchived: false,
 	showProject: false,
 	disabled: false,
 	canMarkAsDone: true,
 	allTasks: () => [],
+	showQuickActions: false,
 })
 
 const emit = defineEmits<{
