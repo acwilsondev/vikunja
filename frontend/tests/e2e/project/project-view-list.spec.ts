@@ -314,4 +314,24 @@ test.describe('Project View List', () => {
 
 		await expect(page.locator('.tasks .task').filter({hasText: tasks[0].title})).toHaveCount(0)
 	})
+
+	test('Should not navigate away when pressing Enter in the quick actions labels field', async ({authenticatedPage: page}) => {
+		await createProjects(1)
+		const tasks = await TaskFactory.create(1, {
+			id: 1,
+			project_id: 1,
+		})
+		await LabelFactory.create(1, {id: 1, title: 'keyboard-label'})
+		await page.goto('/projects/1/1')
+
+		const row = page.locator('.tasks .task').filter({hasText: tasks[0].title}).first()
+		await row.locator('.quick-actions .dropdown-trigger').click()
+		await row.locator('.quick-actions__field .multiselect input').fill('keyboard-label')
+		await page.locator('.multiselect .search-result-button').filter({hasText: 'keyboard-label'}).first().waitFor()
+		await row.locator('.quick-actions__field .multiselect input').press('Enter')
+
+		await expect(row.locator('.labels .tag')).toContainText('keyboard-label')
+		await expect(page).toHaveURL(/\/projects\/1\/1/)
+		await expect(page).not.toHaveURL(/\/tasks\//)
+	})
 })

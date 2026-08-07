@@ -185,6 +185,7 @@
 				trigger-icon="ellipsis-h"
 				:trigger-label="$t('task.detail.actions.quickActions', {task: task.title})"
 				@click.stop
+				@keyup.stop
 			>
 				<div class="quick-actions__field">
 					<label class="quick-actions__label">{{ $t('task.detail.actions.priority') }}</label>
