@@ -602,6 +602,14 @@ defineExpose({
 		}
 	}
 
+	.quick-actions {
+		// Wider than Dropdown.vue's 12rem default: EditLabels' multiselect needs
+		// room for its "add as new label" option, which otherwise wraps to two lines.
+		:deep(.dropdown-menu) {
+			min-inline-size: 18rem;
+		}
+	}
+
 	.quick-actions__field {
 		padding: $item-padding;
 	}
